@@ -4,20 +4,32 @@
  */
 package vista;
 
+import controlador.Ctrl_Usuario;
 import java.awt.Dimension;
-
+import java.awt.Image;
+import java.awt.Toolkit;
+import javax.swing.JOptionPane;
+import modelo.Usuario;
 
 public class FrmLogin extends javax.swing.JFrame {
 
-   
-    public FrmLogin() {//constructor del JFrame Form
+    //constructor del JFrame Form
+    public FrmLogin() {
         initComponents();//inicializa los componentes de la interfaz  
         this.setResizable(false);//Esto deshabilita la capacidad de redimensionar la ventana. Al establecerlo en false, evitas que el usuario ajuste manualmente el tamaño de la ventana.
         this.setLocationRelativeTo(null);//Esto centra la ventana en la pantalla. null como argumento significa que la ventana se posicionará en el centro de la pantalla.
         this.setTitle("Login- SISTEMA DE VENTAS");//Establece el título de la ventana. En este caso, el título se fija como "Login- SISTEMA DE VENTAS".
         this.setSize(new Dimension(700, 500));//Define el tamaño inicial de la ventana en píxeles. En este caso, la ventana se establece con una anchura de 700 píxeles y una altura de 500 píxeles.
+        
     }
 
+    //metodo que nos permite cambiar la imagen del icono de la pestaña
+    @Override
+    public Image getIconImage(){
+    
+        Image retValue = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("img/ventas.png"));//dentro del parentesis ponemos la ruta de donde esta nuestra imagen
+        return retValue;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -40,6 +52,7 @@ public class FrmLogin extends javax.swing.JFrame {
         jButton_IniciarSesion = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setIconImage(getIconImage());
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(51, 153, 255));
@@ -98,13 +111,28 @@ public class FrmLogin extends javax.swing.JFrame {
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/password.png"))); // NOI18N
 
         txt_Usuario.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        txt_Usuario.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_UsuarioKeyPressed(evt);
+            }
+        });
 
         txt_Password.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        txt_Password.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_PasswordKeyPressed(evt);
+            }
+        });
 
         jButton_IniciarSesion.setBackground(new java.awt.Color(51, 153, 255));
         jButton_IniciarSesion.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jButton_IniciarSesion.setForeground(new java.awt.Color(255, 255, 255));
         jButton_IniciarSesion.setText("Iniciar Sesion");
+        jButton_IniciarSesion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_IniciarSesionActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -154,6 +182,24 @@ public class FrmLogin extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton_IniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_IniciarSesionActionPerformed
+        this.login();//el login, verifica si los datos en las cajas de texto son correctas
+    }//GEN-LAST:event_jButton_IniciarSesionActionPerformed
+
+    //evento al presionar una tecla(key) dentro de la caja de texto txt_Usuario
+    private void txt_UsuarioKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_UsuarioKeyPressed
+        if (evt.getKeyCode() == evt.VK_ENTER) {//verificamos si la tecla presionada es la tecla enter (VK_ENTER)
+            txt_Password.requestFocus();// el metodo requestFocus() establece el foco (la atención) en el campo de texto txt_Password, es decir que cuando le de enter pasa el cursor a la caja de texto txt_password
+        }
+
+    }//GEN-LAST:event_txt_UsuarioKeyPressed
+
+    private void txt_PasswordKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_PasswordKeyPressed
+        if (evt.getKeyCode() == evt.VK_ENTER) {
+            this.login(); //verifica si los datos en las cajas de texto son correctas
+        }
+    }//GEN-LAST:event_txt_PasswordKeyPressed
+
     /**
      * @param args the command line arguments
      */
@@ -202,4 +248,26 @@ public class FrmLogin extends javax.swing.JFrame {
     private javax.swing.JPasswordField txt_Password;
     private javax.swing.JTextField txt_Usuario;
     // End of variables declaration//GEN-END:variables
+
+    //permite o no el acceso a la persona
+    private void login() {
+        if (!txt_Usuario.getText().isEmpty() && !txt_Password.getText().isEmpty()) {
+            Ctrl_Usuario controlUsuario = new Ctrl_Usuario();
+            Usuario usuario = new Usuario();
+            usuario.setUsuario(txt_Usuario.getText().trim());//guardamos en el atributo usuario de la clase o modelo Usuario lo que la persona escribio en la caja de texto txt_Usuario (para poder usarlo), el trim()es para que no tome en cuenta los espacios
+            usuario.setPassword(txt_Password.getText().trim());
+            if (controlUsuario.loginUser(usuario)) {//le entregamos el objeto usuario para que el controlador pueda usar sus atributos usuario y password, si el loginUser nos retorna un true
+                //JOptionPane.showMessageDialog(null, "Login correcto...");//que deje entrar
+                FrmMenu menu = new FrmMenu();//creamos una instancia de la interfaz FrmMenu para abrir esa pestaña con el metodo setVisible
+                menu.setVisible(true);
+                this.dispose();//cerramos el login (indicamos con el this que estamos hablando de la clase FrmLogin)
+                
+            } else {//si nos retorna un false
+                JOptionPane.showMessageDialog(null, "Usuario o clave incorrecto");//que indique que esta mal el usuario o contraseña
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(null, "Ingrese sus credenciales");
+        }
+    }
 }
